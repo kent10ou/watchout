@@ -2,16 +2,19 @@
 
 
 var gameOptions = {
-	height: 1000,
+	height: 800,
 	width: 1000,
-	numEnemies: 5,
+	numEnemies: 1,
 	padding: 20,
 }
 
 var gameStats = {
 	score: 0,
-	bestScore: 0
+	bestScore: 0,
+	collision: 0
 }
+
+var hesTouching = false;
 
 var gameBoard = d3.select('.gameboard').append('svg:svg')
 	.attr('width', gameOptions.width)
@@ -82,14 +85,15 @@ gameBoard.selectAll('.gameBoard').data(player)
 	.attr('y', 500)
 	.attr('class', 'player')
 
+var enemySpeed = 1500
 setInterval(function () {
 	var newEnemiesPos = createEnemies();
 	gameBoard.selectAll('.enemy').data(newEnemiesPos)
 		.transition()
 		.attr('x', function (d) { return axes.x(d.x) })
 		.attr('y', function (d) { return axes.y(d.y) })
-		.duration(1500)
-}, 1500)
+		.duration(enemySpeed)
+}, enemySpeed)
 
 setInterval(function () {
 	var newPlayerPos = createPlayer();
@@ -100,22 +104,39 @@ setInterval(function () {
 		.duration(0)
 
 	gameBoard.selectAll(".enemy").each( function(d, i){
-		var xp = axes.x.invert(mouseLoc[0]);
-		var yp = axes.y.invert(mouseLoc[1]);
-		var xe = d.x;
-		var ye = d.y;
+		var xp = mouseLoc[0] - 25//axes.x.invert(mouseLoc[0]);
+		var yp = mouseLoc[1] - 25//axes.y.invert(mouseLoc[1]);
+		var xe = d3.select(this).attr('x')//d.x;
+		var ye = d3.select(this).attr('y')//d.y;
 
 		var a = xe - xp;
 		var b = ye - yp;
 		var c = Math.pow(a, 2) + Math.pow(b, 2);
 		c = Math.sqrt(c);
 
-		if(c < 10){
-			console.log('COLLISION!!');
+		
+		if (c > 50){
+			//console.log('COLLISION!!');
+			hesTouching = false;
+			gameStats.score++;
+
+		} else {
+			if (!hesTouching) {
+				gameStats.collision++;
+				hesTouching = true;
+				if (gameStats.score > gameStats.bestScore) {
+					gameStats.bestScore = gameStats.score
+				}
+			}
+			gameStats.score = 0;
 		}
+	d3.selectAll('.current').select("span").text(gameStats['score'])
+	d3.selectAll('.collisions').select("span").text(gameStats['collision'])
+	d3.selectAll('.high').select("span").text(gameStats['bestScore'])	
 		//console.log(c);
 		//console.log(d);
-		//console.log('mouseLoc: ', axes.x.invert(mouseLoc[0]));
+		//console.log('mouseLoc: ', axes.x.invert(mouseLoc[0])
+		//console.log(c);
 	});
 
 }, 0)
