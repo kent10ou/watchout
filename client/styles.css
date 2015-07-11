@@ -5,8 +5,13 @@ Feel free to use it if you like. */
 
 
 .scoreboard {
-	border: solid 1px white;
-	position: absolute;
-	color: white;
+	border: solid 1px black;
+	color: black;
 	padding: 10px;
+	background-color: yellow;
+	width: 200px;
+	float: left;
+}
+.gameboard {
+	float: left;
 }
